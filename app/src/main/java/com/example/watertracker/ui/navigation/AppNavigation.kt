@@ -36,7 +36,8 @@ fun AppNavigation(viewModel: WaterViewModel) {
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
-                viewModel = viewModel
+                onGoalChange = { viewModel.updateDailyGoal(it) },
+                currentGoal = viewModel.dailyGoal.value
             )
         }
         composable(Screen.Statistics.route) {
