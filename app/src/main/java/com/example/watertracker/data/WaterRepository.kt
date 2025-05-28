@@ -65,7 +65,28 @@ class WaterRepository(private val waterEntryDao: WaterEntryDao) {
     fun getStatisticsForDate(date: Date, goal: Int): Flow<WaterStatistics> {
         val startOfDay = date.getStartOfDay()
         val endOfDay = date.getEndOfDay()
-        return getStatisticsForDateRange(startOfDay, endOfDay, goal)
+        return waterEntryDao.getEntriesForDateRange(startOfDay, endOfDay).map { entries ->
+            if (entries.isEmpty()) {
+                WaterStatistics(
+                    totalAmount = 0,
+                    averageAmount = 0,
+                    maxAmount = 0,
+                    minAmount = 0,
+                    daysWithData = 0,
+                    goalAchievedDays = 0
+                )
+            } else {
+                val totalAmount = entries.sumOf { it.amount }
+                WaterStatistics(
+                    totalAmount = totalAmount,
+                    averageAmount = totalAmount,
+                    maxAmount = entries.maxOf { it.amount },
+                    minAmount = entries.minOf { it.amount },
+                    daysWithData = 1,
+                    goalAchievedDays = if (totalAmount >= goal) 1 else 0
+                )
+            }
+        }
     }
 
     // Получить статистику за неделю
